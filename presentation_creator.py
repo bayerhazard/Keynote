@@ -234,199 +234,39 @@ class Pipe:
             for keyword, url in images.items():
                 image_section += f"- {keyword}: {url}\n"
 
-        prompt = f"""Du bist ein professioneller Content-Creator. Der User möchte eine HTML-Präsentation über ein bestimmtes Thema erstellen.
+        prompt = f"""Du bist ein professioneller Content-Creator für HTML-Präsentationen mit Reveal.js.
 
-## Deine Aufgabe:
-1. Extrahiere das EIGENTLICHE THEM A aus der Anfrage (NICHT "Präsentation" - das ist nur das Format!)
-2. Analysiere den Kontext für HINTERGRUND-INFORMATIONEN zum Thema
-3. Erstelle eine INHALTLICHE Präsentation über das Thema selbst, nicht über "wie man Präsentationen erstellt"
-
-## Briefing (extrahiert aus der Anfrage):
+## Briefing:
 **THEMA:** {briefing["title"]}
 
-**Kontext/Informationen zum Thema:**
+**Kontext:**
 {chr(10).join(f"- {kp}" for kp in briefing["key_points"]) if briefing["key_points"] else "- Allgemeine Informationen zum Thema"}
-
-## WICHTIG - HINTERGRUNDGESTALTUNG:
-- HINTERGRUND MUSS IMMER DUNKEL SEIN: background: #0A0A0A oder #111111
-- KEINE weißen oder hellen Hintergründe verwenden!
-- Alles muss dunkel und elegant aussehen
-- Sections: background: #0A0A0A oder Verläufe von #0A0A0A nach #1A1A1A
 
 {image_section}
 
-## Style Guide - DUNKLES DESIGN (VOLLSTÄNDIG):
-```css
-:root {{
-    --bg-main: #0A0A0A;
-    --bg-dark: #111111;
-    --accent-gold: #C9A45C;
-    --dark-gold: #B8935F;
-    --gold-glow: rgba(201, 164, 92, 0.3);
-    --text-primary: #FFFFFF;
-    --text-secondary: #D4D4D4;
-    --text-body: #B0B0B0;
-    --bg-card: #1A1A1A;
-}}
+## Anforderungen:
+1. DUNKLER HINTERGRUND: `#0A0A0A` oder `#111111` für alle Sections
+2. KEINE weißen/hellen Hintergründe
+3. Erstelle 5-8 professionelle Folien: Startfolie, 3-5 Inhaltsfolien, Endfolie
+4. Verwende ansprechende Layouts: Texte, Bilder, Zitate, Bullet Points
+5. Schriftgrößen sollen GUT LESBAR sein (h1: 3-4em, h2: 2-2.5em, body: 1.2-1.5em)
+6. Bilder: `object-fit: cover` oder `contain` verwenden, NICHT stretchen
 
-/* WICHTIG: ALLES MUSS DUNKEL SEIN - ERZWINING! */
-body, html {{ 
-    background: #0A0A0A !important; 
-    margin: 0;
-    padding: 0;
-}}
-.reveal {{ background: #0A0A0A !important; }}
-.reveal .slides {{ background: #0A0A0A !important; }}
-.reveal .slides section, 
-.reveal-viewport section {{ 
-    background: #0A0A0A !important; 
-}}
-section.slide-content {{ background: #0A0A0A !important; }}
+## Technisch:
+- Reveal.js 5.x von CDN: https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/
+- GSAP von CDN: https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js
+- Google Fonts: Inter
+- `Reveal.initialize()` am Ende des Body
+- Slide-Counter mit Klasse `.slide-counter`
+- `Reveal.getTotalSlides()` für Gesamtanzahl
 
-/* Typography */
-.reveal {{ font-family: 'Inter', sans-serif; }}
-.reveal h1 {{ font-size: 3.5em; font-weight: 700; background: linear-gradient(135deg, #C9A45C, #B8935F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
-.reveal h2 {{ font-size: 2.2em; font-weight: 400; color: #D4D4D4; }}
-.reveal p, .reveal li {{ font-size: 1em; color: #B0B0B0; }}
+## Erlaubte Farben:
+- Gold-Akzent: `#C9A45C`
+- Dunkel-Gold: `#B8935F`
+- Text: `#FFFFFF`, `#D4D4D4`, `#B0B0B0`
+- Cards: `#1A1A1A`
 
-/* Layouts */
-.split-layout {{ display: flex; align-items: center; gap: 40px; }}
-.split-layout > div {{ flex: 1; }}
-.split-layout img {{ width: 100%; border-radius: 20px; }}
-.grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }}
-
-/* Card - DUNKEL */
-.card {{
-    background: #1A1A1A;
-    border-radius: 20px;
-    border: 1px solid rgba(201, 164, 92, 0.15);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    padding: 30px;
-    height: 100%;
-}}
-.card h3 {{ color: #C9A45C; font-size: 1.4em; margin-bottom: 15px; }}
-
-/* Button */
-.btn-pill {{
-    background: linear-gradient(135deg, #C9A45C, #B8935F);
-    color: #050505;
-    border-radius: 50px;
-    padding: 15px 40px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-}}
-
-/* Quote */
-.quote-box {{
-    border-left: 4px solid #C9A45C;
-    padding-left: 40px;
-    font-style: italic;
-    font-size: 1.5em;
-    color: #D4D4D4;
-}}
-
-/* FUSSZEILE - Glassmorphism (auf INHALTSFOLIEN) */
-.footer-container {{
-    position: absolute;
-    bottom: 15px;
-    left: 20px;
-    right: 20px;
-    height: 36px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    backdrop-filter: blur(10px);
-    background: rgba(255,255,255,0.05);
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 0 15px;
-    box-sizing: border-box;
-    pointer-events: none;
-}}
-.footer-text {{
-    font-size: 0.6em;
-    color: #D4D4D4;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 0;
-}}
-```
-
-## Folien-Struktur - JEDE SECTION MUSS EXPLIZIT DUNKLEN HINTERGRUND HABEN:
-
-### 1. STARTFOLIE - KEIN FOOTER:
-```html
-<section style="background: #0A0A0A !important; text-align: center;">
-    <div style="padding-top: 100px;">
-        <h1>"{briefing["title"]}"</h1>
-        <p style="color: #D4D4D4; font-size: 1.2em;">AImighty</p>
-        <button class="btn-pill" onclick="startPresentation()">Präsentation starten</button>
-    </div>
-</section>
-```
-
-### 2. INHALTSFOLIEN (min. 4-6) - MUSS FOOTER HABEN:
-```html
-<section style="background: #0A0A0A !important;">
-    <div style="padding: 40px;">
-        <!-- CONTENT HIER -->
-    </div>
-    <footer class="footer-container">
-        <span class="footer-text">{briefing["title"]}</span>
-        <span class="footer-text">AImighty</span>
-        <span class="footer-text slide-counter">Folie 2 von 6</span>
-    </footer>
-</section>
-```
-
-### 3. ABSCHLUSSFOLIE - KEIN FOOTER:
-```html
-<section style="background: #0A0A0A !important; text-align: center;">
-    <h1>Vielen Dank!</h1>
-    <p>AImighty</p>
-</section>
-```
-
-## JavaScript - PFlicht:
-```javascript
-// WICHTIG: Alle sections bekommen explizit dunklen Hintergrund
-document.querySelectorAll('section').forEach(s => {{
-    s.style.background = '#0A0A0A';
-}});
-
-// Slide Counter aktualisieren
-function updateSlideCounter() {{
-    const counters = document.querySelectorAll('.slide-counter');
-    const current = Reveal.getIndices().current + 1;
-    const total = Reveal.getTotalSlides();
-    counters.forEach(el => {{
-        if(el) el.textContent = 'Folie ' + current + ' von ' + total;
-    }});
-}}
-
-// GSAP Animationen
-Reveal.on('ready', () => {{ updateSlideCounter(); }});
-Reveal.on('slidechanged', event => {{
-    updateSlideCounter();
-    gsap.fromTo('.anim-h2', {{y: 30, opacity: 0}}, {{y: 0, opacity: 1, duration: 1.2, ease: 'power4.out'}});
-    gsap.fromTo('.anim-p', {{y: 20, opacity: 0}}, {{y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: 'power2.out'}});
-    gsap.fromTo('.anim-item', {{y: 30, opacity: 0}}, {{y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: 'power3.out'}});
-}});
-```
-
-## Technische Anforderungen:
-1. Reveal.js 5.x von CDN
-2. GSAP von CDN
-3. Google Fonts: Inter
-4. JEDE section MUSS `style="background: #0A0A0A !important;"` haben!
-5. Slide-Counter verwendet die KLASSE `.slide-counter` (NICHT ID!)
-6. KEINE separaten Script-Blöcke für Counter - alles in EINEM Script
-
-Erstelle jetzt die komplette HTML-Präsentation. Verwende reines HTML ohne Markdown-Wrapper!"""
+Erstelle jetzt die HTML-Präsentation. Verwende reines HTML ohne Markdown-Wrapper!"""
 
         return prompt
 
@@ -530,6 +370,27 @@ Erstelle jetzt die komplette HTML-Präsentation. Verwende reines HTML ohne Markd
         html_output = re.sub(r"```$", "", html_output)
         html_output = re.sub(r"^```\s*", "", html_output)
 
+        if "Reveal.initialize" not in html_output:
+            html_output = html_output.replace(
+                "</body>",
+                """<script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: false,
+            controls: true,
+            progress: false,
+            center: false,
+            transition: 'fade',
+            width: 1920,
+            height: 1080,
+        });
+        document.querySelectorAll('section').forEach(function(s) {
+            s.style.background = '#0A0A0A';
+        });
+        document.body.style.background = '#0A0A0A';
+        </script></body>""",
+            )
+
         if (
             not html_output.strip().startswith("<!DOCTYPE")
             and "<html" not in html_output[:100]
@@ -552,14 +413,21 @@ Bitte versuchen Sie es erneut oder prüfen Sie:
         slide_counter_js = f"""
         <script>
         function updateSlideCounter() {{
-            var counters = document.querySelectorAll('#slide-counter');
+            var counters = document.querySelectorAll('.slide-counter');
             var current = Reveal.getIndices().current + 1;
             counters.forEach(function(c) {{
-                if(c && c.id === 'slide-counter') c.textContent = 'Folie ' + current + ' von {total_slides}';
+                if(c) c.textContent = 'Folie ' + current + ' von {{total_slides}}';
             }});
         }}
         Reveal.on('ready', updateSlideCounter);
         Reveal.on('slidechanged', updateSlideCounter);
+        
+        // Fallback: Alle Sections dunkel setzen falls LLM das vergessen hat
+        document.querySelectorAll('section').forEach(function(s) {{
+            s.style.background = '#0A0A0A';
+        }});
+        document.body.style.background = '#0A0A0A';
+        document.querySelector('.reveal').style.background = '#0A0A0A';
         </script>
         """
         html_output = html_output.replace("</body>", slide_counter_js + "</body>")
